@@ -26,7 +26,7 @@ jobs:
             any::tidyverse
             any::robotoolbox
       - name: importation données
-        run: Rscript -e 'sources("importation.R")'
+        run: Rscript -e 'source("importation.R")'
         env:
           MY_TOKEN: ${{ secrets.MY_TOKEN_GHA }}
           MY_UID: ${{ secrets.MY_UID_GHA }}
