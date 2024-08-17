@@ -23,6 +23,7 @@ library(tibble)
 library(gt)
 readRDS('df.rds') %>%
     select(3:7) -> df
+
 df %>% 
   labelled::remove_val_labels() %>%
   group_by(Enqueteur) %>%
