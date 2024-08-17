@@ -1,0 +1,82 @@
+---
+title: "Etat Recaptulatif de la Collecte de ce jour: `r Sys.Date()`"
+author: "Fankam Marc"
+format:
+  pdf:
+    pdf-engine: lualatex
+---
+
+# I. Nombre de questionnaires remplis par enquêteur
+
+Le graphique ci-dessous retrace le nombre de questionnaires remplis par chaque enquêteurs.
+
+```{r}
+#| label: graph
+#| warning: false
+#| message: false
+#| echo: false
+
+
+library(knitr)
+library(tidyverse)
+library(tibble)
+library(gt)
+readRDS('df.rds') %>%
+    select(3:7) -> df
+df %>% 
+  labelled::remove_val_labels() %>%
+  group_by(Enqueteur) %>%
+  summarise(nombre = n()) %>%
+  add_row( Enqueteur = 'Moyenne', !!! colMeans(.[-1])) %>%
+  mutate(sup_moy = ifelse(Enqueteur == "Moyenne", TRUE, FALSE)) %>% 
+  mutate(Enqueteur = fct_reorder(Enqueteur, nombre)) %>% 
+  ggplot(aes(x=Enqueteur,y=nombre,fill=sup_moy)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(name=NULL, values = c("#B0B0B0D0", "#00B0F0"))+
+  coord_flip() +
+  theme_minimal() +
+  theme(axis.title.x= element_blank(),
+        axis.title.y = element_blank(),
+        axis.text = element_text(size = 10),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank()
+       )
+
+ 
+```
+
+
+
+# II. Les questionnaires avec les valeures manquantes
+
+Le tableau ci-dessous donne les valeurs manquantes des questionnaires.
+```{r}
+#| label: tab1
+#| warning: false
+#| message: false
+#| echo: false
+#| results: "asis"
+
+df |>
+  labelled::remove_val_labels() |>
+  filter(is.na(Region) | is.na(Record_your_current_location)) |>
+  gt::gt() |>
+  tab_spanner(
+    label = md("**Les questionnaires à complèter**"),
+    columns = c(2:5)
+  ) %>%
+   fmt_number(
+    columns = 5,
+    decimals = 3
+  ) %>%
+  cols_label(
+    #`Enqueteur` = "Nom enquêteur",
+    Sexe_de_l_enqueteur = "Sexe",
+    #`Region` = "Age",
+    #`Age` = "Lieu de residence",
+    Record_your_current_location = "Geolocalisation"
+  ) %>%
+ cols_align(align = "center",
+             columns = 2:5)
+
+```
