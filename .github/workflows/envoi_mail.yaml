@@ -3,8 +3,7 @@ name: envoi_mon_mail
 
 
 on:
-   schedule:
-      - cron: workflow_dispatch
+  workflow_dispatch
    
    
 jobs:
