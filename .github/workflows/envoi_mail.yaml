@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 on:
    schedule:
       - cron: '15 * * * *'
@@ -34,4 +35,41 @@ jobs:
             ignore_cert: true
             convert_markdown: true
             attachments: first_doc.pdf
+=======
+on:
+   workflow_dispatch
+   
+   
+jobs:
+    envoi_mail:
+      permissions:
+        contents: write
+        pages: write
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v4
+        
+        - name: Upload a Build Artifact
+          uses: actions/upload-artifact@v3.1.0
+          with:
+            name: first_doc.pdf
+            path: first_doc.pdf
+
+        - name: Envoi de mail
+          uses: dawidd6/action-send-mail@v3
+          with:
+            server_address: smtp.gmail.com
+            server_port: 465
+            secure: true
+            username: ${{secrets.MAIL_USERNAME_GHA}}
+            password: ${{secrets.MAIL_PASSWORD_GHA}}
+            subject: Le Tableau recapitulatif du jour
+            to: marcfankam907@gmail.com
+            from: Fankam Marc
+            body: Veuillez trouver ci-joint le tableau recapitulatif de la situation de la collecte de ce jour
+            ignore_cert: true
+            convert_markdown: true
+            attachments: first_doc.pdf
+>>>>>>> 094cd6d1433511dc474223e6c203e4f6cdcb95a6
             priority: low
