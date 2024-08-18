@@ -28,8 +28,6 @@ jobs:
             server_address: smtp.gmail.com
             server_port: 465
             secure: true
-            username: ${{secrets.MAIL_USERNAME_GHA}}
-            password: ${{secrets.MAIL_PASSWORD_GHA}}
             subject: Le Tableau recapitulatif du jour
             to: marcfankam907@gmail.com
             from: Fankam Marc
