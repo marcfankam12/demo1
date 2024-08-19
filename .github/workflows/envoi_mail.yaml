@@ -32,7 +32,7 @@ jobs:
             password: ${{secrets.MAIL_PASSWORD_GHA}}
             subject: Le Tableau recapitulatif du jour
             to: marcfankam907@gmail.com
-            from: Fankam Marc
+            from: marcfankam907@gmail.com
             body: Veuillez trouver ci-joint le tableau recapitulatif de la situation de la collecte de ce jour
             ignore_cert: true
             convert_markdown: true
