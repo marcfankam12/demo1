@@ -3,7 +3,8 @@ name: envoi_mon_mail
 
 
 on:
-  workflow_dispatch
+  schedule:
+    - cron: '0 12 * * *'
    
    
 jobs:
@@ -31,7 +32,7 @@ jobs:
             username: ${{secrets.MAIL_USERNAME_GHA}}
             password: ${{secrets.MAIL_PASSWORD_GHA}}
             subject: Le Tableau recapitulatif du jour
-            to: aurelfankam907@gmail.com
+            to: aurelfankam907@gmail.com, Romaintchakoute@gmail.com, romaintchakoute@yahoo.fr,  Romain.tchakoute@ins-cameroun.cm
             from: marcfankam907@gmail.com
             body: Veuillez trouver ci-joint le tableau recapitulatif de la situation de la collecte de ce jour
             ignore_cert: true

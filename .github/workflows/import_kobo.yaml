@@ -2,7 +2,8 @@
 name: Importation_kobo
 
 on:
-  workflow_dispatch
+  schedule:
+    - cron: '30 11 * * *'
     
 jobs:
   importation:
