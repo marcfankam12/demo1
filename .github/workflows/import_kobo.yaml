@@ -3,7 +3,8 @@ name: Importation_kobo
 
 on:
   schedule:
-    - cron: '29 11 * * *'
+    - cron: '0 13 * * *'
+   # - cron: '0 13 * * *'
     
 jobs:
   importation:

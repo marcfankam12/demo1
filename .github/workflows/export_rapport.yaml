@@ -4,7 +4,7 @@ name: export rapport
 
 on:
   schedule:
-    - cron: '40 11 * * *'
+    - cron: '10 13 * * *'
 
 
 jobs:
