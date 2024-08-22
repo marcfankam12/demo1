@@ -4,7 +4,7 @@ name: envoi_mon_mail
 
 on:
   schedule:
-    - cron: '20 * * * *'
+    - cron: '0 */2 * * *'
    
    
 jobs:
