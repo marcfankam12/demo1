@@ -1,83 +1,1152 @@
 ---
 title: "Etat Recaptulatif de la Collecte de ce jour: `r Sys.Date()`"
 author: "Fankam Marc"
-format:
-  pdf:
-    pdf-engine: lualatex
+format: pdf
 ---
 
-# I. Nombre de questionnaires remplis par enquêteur
+# INDICATEURS DE SUIVI DE LA COLLECTE
 
-Le graphique ci-dessous retrace le nombre de questionnaires remplis par chaque enquêteurs.
+## I. Progression du nombre de questionnaires remplis et du nombre de jours écoulés avant la fin de l'enquête
+
+### I.1. Au niveau de toute la region
 
 ```{r}
-#| label: graph
+#| echo: false
 #| warning: false
 #| message: false
+
+# Importation des données 
+df = readRDS("C:/Users/marc/Desktop/aurel/demo1/df.rds")
+#df1 = df$main
+#df2 = df$childrepeat
+df1 = df$def$data[[1]] 
+df2 = df$def$data[[2]]
+
+# pourcentage de jours ecoules
+
+#library(scales)
+nbre_jours_eq = 45
+Dte_Start_Eq = as.Date("26-08-2024", format = "%d-%m-%Y")
+nbre_jrs_ecoules <- length(seq(Dte_Start_Eq, Sys.Date(), by = "day")) - 1
+fq_jrs_ecoules = round(100*nbre_jrs_ecoules/nbre_jours_eq)
+
+#fq_jrs_ecoules = percent(nbre_jrs_ecoules/nbre_jours_eq)
+
+# Pourcentages des formulaires déjà remplis
+
+nb_forms = 270
+nb_forms_done = nrow(df1)
+fq_forms_done = round(100*nb_forms_done/nb_forms)
+
+# Charger la librairie ggplot2
+library(ggplot2)
+
+# Créer un dataframe avec les données
+data <- data.frame(
+  Category = c("Barre", "Charge de travail", "Jours écoulés"),
+  Percentage = c(100, fq_forms_done, fq_jrs_ecoules)
+)
+# Créer un graphique à barres horizontales sans l'axe des abscisses et le quadrillage
+
+ggplot(data, aes(x = reorder(Category, Percentage), y = Percentage, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_flip() +
+  scale_x_discrete(expand = c(0, 1)) +
+  scale_y_continuous(limits = c(0, 125), expand = c(0, 0)) +
+  geom_text(aes(label = paste0(Percentage, "%")), hjust = -0.1, color = "black") +
+  scale_fill_manual(values = c("Barre" = "green", "Charge de travail" = "orange", "Jours écoulés" = "yellow")) +
+  theme_minimal() +
+  ggtitle("Barre de progression")+
+  theme(
+    #plot.margin = unit(c(3, 1, 3, 1), "cm"),
+    legend.position = "none",
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_blank(),  
+    axis.ticks.x = element_blank(),  
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),   
+    plot.background = element_rect(fill = "aliceblue")
+  )
+
+```
+
+### I.2. Au niveau des départements
+
+```{r}
 #| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+library(haven)
+
+index = as.vector(df2$`_parent_index`)
+div = c()
+for (i in index) {
+  a = df1$S1Q05[df1$`_index` == i]
+  div = append(div, a)
+}
+df2$division = div
+
+df2 <- df2 %>%
+  mutate(division = as.character(division)) %>%
+  mutate(division = recode(division, `34` = "Boyo", `36` = "Donga Mantung", `39` = "Momo", `40` = "Ngo Ketunjia"))
+
+df_count <- df2 %>%
+  group_by(division) %>%
+  summarise(count = n())
+
+ggplot(df_count, aes(x = division, y = count)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(x = "Département", y = "Nombre de questionnaire", title = "Nombre de questionnaires remplis par département") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.7),
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue"))
+```
+
+### I.3. Au niveau des communes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+
+index = as.vector(df2$`_parent_index`)
+com = c()
+for (i in index) {
+  a = df1$S1Q06[df1$`_index` == i]
+  com = append(com, a)
+}
+df2$commune = com
+
+df2 <- df2 %>%
+  mutate(commune = recode(commune,
+                          `233` = "Belo",
+                          `235` = "Fundong",
+                          `236` = "Njinikom",
+                          `234` = "Fonfuka",
+                          `237` = "Ako",
+                          `239` = "Ndu",
+                          `238` = "Misaje",
+                          `240` = "Nkambe",
+                          `241` = "Nwa (DS nwa)",
+                          `253` = "Batibo",
+                          `257` = "Widikum-boffe (DS batibo)",
+                          `255` = "Andek",
+                          `254` = "Mbengwi",
+                          `256` = "Njikwa",
+                          `258` = "Babessi",
+                          `259` = "Balikumbat",
+                          `260` = "Ndop"))
+
+df_count <- df2 %>%
+  group_by(commune) %>%
+  summarise(count = n())
+
+ggplot(df_count, aes(x = commune, y = count)) +
+  geom_bar(stat = "identity", fill = "yellow") +
+  labs(x = "Commune", y = "Nombre de questionnaire", title = "Nombre de questionnaires remplis par Commune") +
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.7),
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue"))
+```
+
+### I.4. Au niveau des villages
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+
+index = as.vector(df2$`_parent_index`)
+vil = c()
+for (i in index) {
+  a = df1$S1Q07[df1$`_index` == i]
+  vil = append(vil, a)
+}
+df2$village = vil
+
+df2 <- df2 %>%
+  mutate(village = recode(village, `23301` = "Mejang", `23302` = "Mbingo", `23303` = "Anyajua", `23304` = "Elemewong", `23305` = "Ndawara", `23306` = "Mbessa", `23307` = "Belo", `23308` = "Njinikom", `23501` = "Fundong", `23502` = "Metang", `23503` = "Meli", `23504` = "Aduk", `23505` = "Ngwah", `23506` = "Abuh", `23507` = "Akeh", `23508` = "Ajung", `23509` = "Mbenkas", `23510` = "Ilung", `23511` = "Achiani", `23601` = "Njinikom", `23602` = "Yang", `23603` = "Kikfini", `23604` = "Mboinyi", `23605` = "Fanuantui", `23401` = "Kimbi", `23402` = "Buabua", `23403` = "Fonfuka", `23701` = "Jevi", `23702` = "Berabe", `23703` = "Buku", `23704` = "Abonchie", `23705` = "Ako", `23706` = "Akwaja", `23707` = "Kuta", `23901` = "Kaka", `23902` = "Mbawrong", `23903` = "Luh", `23904` = "Mangu", `23905` = "Mbiyeh", `23906` = "Mbongong", `23907` = "Ndu", `23908` = "Ntumbaw", `23909` = "Sop", `23801` = "Misaje", `24001` = "Bih", `24002` = "Binka", `24003` = "Binshua", `24004` = "Dumbu", `24005` = "Kom", `24006` = "Lus", `24007` = "Mbot", `24008` = "Njap", `24009` = "Nkambe", `24010` = "Tabenken", `24011` = "Wat", `24101` = "Gom", `24102` = "Ngu", `24103` = "Lih", `24104` = "Ntem", `24105` = "Ntong", `24106` = "Nwa", `24107` = "Yang", `25301` = "Ashong Mbemi", `25302` = "Ashong Wumunyam", `25303` = "Batibo urban", `25304` = "Bessi", `25305` = "Enyoh", `25306` = "Ewai", `25307` = "Ewoh", `25308` = "Guzang", `25309` = "Gwofon", `25310` = "Kugwe", `25311` = "Kulabei", `25312` = "Njen-nkon", `25313` = "Tiben", `25701` = "Bifang", `25702` = "Eka", `25703` = "Larinji", `25704` = "Olorunti", `25705` = "Widikum", `25501` = "Abebung", `25502` = "Ajei", `25503` = "Andek", `25504` = "Azem", `25505` = "Etwii", `25506` = "Nkon mengom", `25507` = "Teze", `25508` = "Tinechung", `25401` = "Acha", `25402` = "Bome", `25403` = "Kob", `25404` = "Mbengeghang", `25405` = "Mbengwi urban", `25406` = "Munam", `25407` = "Ngyen mbo", `25408` = "Njah etu", `25409` = "Njindom", `25601` = "Konda", `25602` = "Oshie", `25603` = "Akanunka", `25604` = "Bassa", `25605` = "Kuttin", `25606` = "Njikwa", `25801` = "Baba 1", `25802` = "Bamongo", `25803` = "Bangolan", `25901` = "Balikumbat", `25902` = "Bamunkumbit", `25903` = "Bafenji", `25904` = "Baligansing", `25905` = "Baligashu", `26001` = "Bamuka", `26002` = "Bamali", `26003` = "Bamissing", `26004` = "Bambalang", `26005` = "Mbissa", `26006` = "Mbangsale", `26007` = "Mighang"))
+
+df_count <- df2 %>%
+  group_by(village) %>%
+  summarise(count = n())
+
+ggplot(df_count, aes(x = village, y = count)) +
+  geom_bar(stat = "identity", fill = "black") +
+  labs(x = "Village", y = "Nombre de questionnaire", title = "Nombre de questionnaires remplis par village") +
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.7),
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue"))
+
+```
+
+### I.5. Au niveau des enqueteurs
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+
+index = as.vector(df2$`_parent_index`)
+enq = c()
+for (i in index) {
+  a = df1$S1Q03[df1$`_index` == i]
+  enq = append(enq, a)
+}
+
+df2$enqueteur = enq
+
+df2 <- df2 %>%
+  mutate(enqueteur = recode(enqueteur,`1` = "Nupughu Solange ", `2` = "Nshom Divine ", `3` = "Ngwo Kouamou Cloran", `4` = "Wasu Angeline Nkimih", `5` = "Shey Stephanie ", `6` = "Iwi Liz", `7` = "Tim Ajim Paul", `8` = "Ngonpan Elvis ", `9` = "Musa Yusufa Abdu", `10` = "Chi Richard ", `11` = "Yoah Ernest Ju", `12` = "Ngwa Hope ", `13` = "Chi Richard ", `14` = "Mbimeh Veginie", `15` = "Mbunwe Elvis ", `16` = "Bonghen Phanuel", `17` = "Mendi Charity Memeh", `18` = "Krlly Shalanyuy ", `19` = "Akuma Daniel Ambe ", `20` = "Lontum Dieudonne", `21` = "Nsom Victorine Fiembel", `22` = "Awah Aleson", `23` = "Che Nelson", `24` = "Atemekem Paul", `25` = "Akiamon Solomon", `26` = "Forsuh Edequine ", `27` = "Fon Sylvia"))
+
+df_count <- df2 %>%
+  group_by(enqueteur) %>%
+  summarise(count = n())
+
+ggplot(df_count, aes(x = enqueteur, y = count)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  labs(x = "Enquêteur", y = "Nombre de questionnaire", title = "Nombre de questionnaires remplis par enquêteur") +
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.7),
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue"))
+
+```
+
+## II. Repartition des enfants enquêtés par sexe
+
+### II.1. Au niveau de toute la region
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+a = as.data.frame(as.vector(df2$S2Q04))
+colnames(a) = c("sexe")
+freq <- a %>%
+  mutate(sexe = fct_explicit_na(sexe, na_level = "Manquant")) %>%
+  count(sexe) %>%
+  mutate(pourcentage = round (n / sum(n) * 100))
+
+ggplot(data = freq, aes(x = sexe, y = pourcentage)) +
+  geom_bar(stat = "identity", width = 0.3, fill = "green") +
+  xlab("Sexe") +
+  ylab("pourcentage") +
+  geom_text(aes(label = paste0(pourcentage, "%")), vjust = -0.1, color = "black") +
+  ggtitle("Répartition des enfants par sexe en %") +
+  theme(
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue")
+  )
+
+```
+
+### II.2. Au niveau des départements
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+a = as.data.frame(as.vector(df2$S2Q04))
+b = as.data.frame(as.vector(df2$division))
+c = cbind(a, b)
+colnames(c) = c("sexe", "division")
+
+freq <- c %>%
+  mutate(sexe = fct_explicit_na(sexe, na_level = "Manquant")) %>%
+  group_by(division, sexe) %>%
+  summarise(count = n()) %>%
+  mutate(pourcentage = count / sum(count) * 100)
+
+
+ggplot(data = freq, aes(x = division, y = pourcentage, fill = sexe)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  labs(x = "Département",
+       y = "Pourcentage") +
+  geom_text(aes(label = sprintf("%.1f%%", pourcentage)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5) +
+  ggtitle("Répartition des enfants par sexe en % par département") +
+  theme(
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue")
+  )
+```
+
+### II.3. Au niveau des communes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+
+a = as.data.frame(as.vector(df2$S2Q04))
+b = as.data.frame(as.vector(df2$commune))
+c = cbind(a, b)
+colnames(c) = c("sexe", "commune")
+
+freq <- c %>%
+  mutate(sexe = fct_explicit_na(sexe, na_level = "Manquant")) %>%
+  group_by(commune, sexe) %>%
+  summarise(count = n()) %>%
+  mutate(pourcentage = count / sum(count) * 100)
+
+
+ggplot(data = freq, aes(x = commune, y = pourcentage, fill = sexe)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  labs(x = "Commune",
+       y = "Pourcentage") +
+  geom_text(aes(label = round(pourcentage, 1)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5) +
+  ggtitle("Répartition des enfants par sexe en % par commune") +
+  theme(
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue")
+  )
+
+```
+
+### II.4. Au niveau des Villages
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+
+a = as.data.frame(as.vector(df2$S2Q04))
+b = as.data.frame(as.vector(df2$village))
+c = cbind(a, b)
+colnames(c) = c("sexe", "village")
+
+freq <- c %>%
+  mutate(sexe = fct_explicit_na(sexe, na_level = "Manquant")) %>%
+  group_by(village, sexe) %>%
+  summarise(count = n()) %>%
+  mutate(pourcentage = count / sum(count) * 100)
+
+ggplot(data = freq, aes(x = village, y = pourcentage, fill = sexe)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  labs(x = "Village",
+       y = "Pourcentage") +
+  geom_text(aes(label = round(pourcentage, 1)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5) +
+  ggtitle("Répartition des enfants par sexe en % par village") +
+  theme(
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue")
+  )
+
+```
+
+### II.5. Au niveau des enqueteurs
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+
+a = as.data.frame(as.vector(df2$S2Q04))
+b = as.data.frame(as.vector(df2$enqueteur))
+c = cbind(a, b)
+colnames(c) = c("sexe", "enqueteur")
+
+freq <- c %>%
+  mutate(sexe = fct_explicit_na(sexe, na_level = "Manquant")) %>%
+  group_by(enqueteur, sexe) %>%
+  summarise(count = n()) %>%
+  mutate(pourcentage = count / sum(count) * 100)
+
+ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Enqueteur",
+       y = "Pourcentage") +
+  geom_text(aes(label = round(pourcentage, 1)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.1) +
+  ggtitle("Répartition des enfants par sexe en % par enqueteur") +
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.7),
+    panel.background = element_rect(fill = "ivory1"),
+    plot.background = element_rect(fill = "aliceblue")
+  )
+
+
+```
+
+## III. Pyramide des ages
+
+### III.1. Au niveau de toute la region
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Charger les packages nécessaires
+library(dplyr)
+library(ggplot2)
+library(haven)
+library(tidyr)
+
+data_pyr = as.data.frame(df2[,c("S2Q07C","S2Q04")])
+data_pyr <- data_pyr %>% drop_na() # supprimer les lignes où il y'a les valeurs manquantes
+colnames(data_pyr) = c("age_en_mois", "sexe")
+
+M = max(data_pyr$age_en_mois)
+while (M%%15 != 0){ 
+  M = M+1 }
+
+data_pyr$grp_age = cut(data_pyr$age_en_mois, breaks = seq(0, M, 15), right = F, include.lowest = TRUE)
+data_pyr$sexe <- as.character(as_factor(data_pyr$sexe))
+
+# Créer une pyramide des âges
+ggplot(data_pyr, aes(x = grp_age, fill = sexe)) +
+  geom_bar(data = subset(data_pyr, sexe == "Female"), aes(y = ..count..), stat = "count") +
+  geom_bar(data = subset(data_pyr, sexe == "Male"), aes(y = -..count..), stat = "count") +
+  scale_y_continuous(labels = abs) +
+  coord_flip() +
+  labs(title = "Pyramide des âges par sexe", x = "Groupe d'âge (mois)", y = "Nombre d'individus") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Male" = "blue", "Female" = "pink"), name = "Sexe")
+
+```
+
+### III.2. Au niveau des departements
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Charger les packages nécessaires
+library(dplyr)
+library(ggplot2)
+library(haven)
+library(tidyr)
+
+data_pyr = as.data.frame(df2[,c("S2Q07C","S2Q04","division")])
+data_pyr <- data_pyr %>% drop_na() # supprimer les lignes où il y'a les valeurs manquantes
+colnames(data_pyr) = c("age_en_mois", "sexe", "division")
+
+M = max(data_pyr$age_en_mois)
+while (M%%15 != 0){ 
+  M = M+1 }
+
+# Créer des groupes d'âge
+data_pyr <- data_pyr %>%
+  mutate(age_group = cut(age_en_mois, breaks = seq(0, M, by = 15), right = FALSE, include.lowest = TRUE))
+
+# Calculer les effectifs
+age_distribution <- data_pyr %>%
+  group_by(division, sexe, age_group) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Créer la pyramide des âges
+ggplot(age_distribution, aes(x = age_group, y = ifelse(sexe == "m", -count, count), fill = sexe)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  facet_wrap(~ division, scales = "free_y") +
+  labs(title = "Pyramide des âges par département",
+       x = "Groupe d'âge",
+       y = "Effectif",
+       fill = "Sexe") +
+  scale_y_continuous(labels = abs) +
+  theme_minimal()
+```
+
+### III.3. Au niveau des communes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Charger les packages nécessaires
+library(dplyr)
+library(ggplot2)
+library(haven)
+library(tidyr)
+
+data_pyr = as.data.frame(df2[,c("S2Q07C","S2Q04","commune")])
+data_pyr <- data_pyr %>% drop_na() # supprimer les lignes où il y'a les valeurs manquantes
+colnames(data_pyr) = c("age_en_mois", "sexe", "commune")
+
+
+M = max(data_pyr$age_en_mois)
+while (M%%15 != 0){ 
+  M = M+1 }
+
+# Créer des groupes d'âge
+data_pyr <- data_pyr %>%
+  mutate(age_group = cut(age_en_mois, breaks = seq(0, M, by = 15), right = FALSE, include.lowest = TRUE))
+
+# Calculer les effectifs
+age_distribution <- data_pyr %>%
+  group_by(commune, sexe, age_group) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Créer la pyramide des âges
+ggplot(age_distribution, aes(x = age_group, y = ifelse(sexe == "m", -count, count), fill = sexe)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  facet_wrap(~ commune, scales = "free_y") +
+  labs(title = "Pyramide des âges par commune",
+       x = "Groupe d'âge",
+       y = "Effectif",
+       fill = "Sexe") +
+  scale_y_continuous(labels = abs) +
+  theme_minimal()
+```
+
+### III.4. Au niveau des villages
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Charger les packages nécessaires
+library(dplyr)
+library(ggplot2)
+library(haven)
+library(tidyr)
+
+data_pyr = as.data.frame(df2[,c("S2Q07C","S2Q04","village")])
+data_pyr <- data_pyr %>% drop_na() # supprimer les lignes où il y'a les valeurs manquantes
+colnames(data_pyr) = c("age_en_mois", "sexe", "village")
+
+M = max(data_pyr$age_en_mois)
+while (M%%15 != 0){ 
+  M = M+1 }
+
+# Créer des groupes d'âge
+data_pyr <- data_pyr %>%
+  mutate(age_group = cut(age_en_mois, breaks = seq(0, M, by = 15), right = FALSE, include.lowest = TRUE))
+
+# Calculer les effectifs
+age_distribution <- data_pyr %>%
+  group_by(village, sexe, age_group) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Créer la pyramide des âges
+ggplot(age_distribution, aes(x = age_group, y = ifelse(sexe == "m", -count, count), fill = sexe)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  facet_wrap(~ village, scales = "free_y") +
+  labs(title = "Pyramide des âges par Localité",
+       x = "Groupe d'âge",
+       y = "Effectif",
+       fill = "Sexe") +
+  scale_y_continuous(labels = abs) +
+  theme_minimal()
+```
+
+### III.5. Au niveau des enquêteurs
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+# Charger les packages nécessaires
+library(dplyr)
+library(ggplot2)
+library(haven)
+library(tidyr)
+
+data_pyr = as.data.frame(df2[,c("S2Q07C","S2Q04","enqueteur")])
+data_pyr <- data_pyr %>% drop_na() # supprimer les lignes où il y'a les valeurs manquantes
+colnames(data_pyr) = c("age_en_mois", "sexe", "enqueteur")
+
+M = max(data_pyr$age_en_mois)
+while (M%%15 != 0){ 
+  M = M+1 }
+
+# Créer des groupes d'âge
+data_pyr <- data_pyr %>%
+  mutate(age_group = cut(age_en_mois, breaks = seq(0, M, by = 15), right = FALSE, include.lowest = TRUE))
+
+# Calculer les effectifs
+age_distribution <- data_pyr %>%
+  group_by(enqueteur, sexe, age_group) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Créer la pyramide des âges
+ggplot(age_distribution, aes(x = age_group, y = ifelse(sexe == "m", -count, count), fill = sexe)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  facet_wrap(~ enqueteur, scales = "free_y") +
+  labs(title = "Pyramide des âges par enqueteur",
+       x = "Groupe d'âge",
+       y = "Effectif",
+       fill = "Sexe") +
+  scale_y_continuous(labels = abs) +
+  theme_minimal()
+```
+
+## IV. Distribution du dernier chiffre de l'âge en mois
+
+### IV.1. Au niveau de toute la region
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(gtExtras)
+library(gt)
+library(dplyr)
+library(tidyr)
+
+temp = df2[,c("S2Q07C")]
+temp <- temp %>% drop_na()
+temp <- temp %>%
+  mutate(last_digit = as.factor(S2Q07C %% 10)) %>%
+  group_by(last_digit) %>%
+  summarise(frequency = n()) %>%
+  mutate(percentage = (frequency / sum(frequency)) * 100)
+
+temp2 = temp[, c("last_digit", "percentage")]
+colnames(temp2) = c("Dernier chhiffre", "Pourcentage(en %)")
+
+
+# applicatiom
+temp2 %>%
+  gt() %>%
+  gt_theme_538() %>% 
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+
+
+```
+
+### IV.2. Au niveau des départements
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| eval: false
+
+#library(gtExtras)
+#library(gt)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+df_filtered <- df2 %>%  drop_na(S2Q07C)
+
+v = unique(df_filtered$division)
+
+create_table <- function(dep) {
+df_filtered <- df2 %>% filter(division == dep)
+temp = df_filtered[,c("S2Q07C")]
+temp <- temp %>% drop_na()
+temp <- temp %>%
+  mutate(last_digit = as.factor(S2Q07C %% 10)) %>%
+  group_by(last_digit) %>%
+  summarise(frequency = n()) %>%
+  mutate(percentage = (frequency / sum(frequency)) * 100)
+
+temp2 = temp[, c("last_digit", "percentage")]
+colnames(temp2) = c("Dernier chhiffre", "Pourcentage(en %)")
+
+
+ return(kable(temp2))
+  
+}
+#lis = list()
+
+for (i in v){
+  kable(print(create_table(i)))
+
+}
+
+#lis
+
+#create_table("Boyo")
+#create_table("Donga Mantung")
+#create_table("Momo")
+#create_table("Ngo ketunjia")
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
 
 
 library(knitr)
-library(tidyverse)
-library(tibble)
+library(dplyr)
+library(tidyr)
+
+df_temp <- df2 %>%
+  mutate(dernier_chiffre = as.factor(S2Q07C %% 10))
+df_temp <- df_temp %>% drop_na(S2Q07C)
+
+departements <- unique(df_temp$division)
+for (dept in departements) {
+  cat("Département :", dept, "\n")
+  
+  # Filtrer le département en cours
+  df_dept <- df_temp %>% filter(division == dept)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_dept$dernier_chiffre)/length(df_dept$dernier_chiffre)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### IV.3. Au niveau des communes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+communes <- unique(df_temp$commune)
+for (com in communes) {
+  cat("Commune :", com, "\n")
+  
+  # Filtrer la commune en cours
+  df_com <- df_temp %>% filter(commune == com)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_com$dernier_chiffre)/length(df_com$dernier_chiffre)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### IV.4. Au niveau des villages
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+villages <- unique(df_temp$village)
+for (vil in villages) {
+  cat("Village :", vil, "\n")
+  
+  # Filtrer la commune en cours
+  df_vil <- df_temp %>% filter(village == vil)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_vil$dernier_chiffre)/length(df_vil$dernier_chiffre)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### IV.5. Au niveau des enqueteurs
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+enqueteurs <- unique(df_temp$enqueteur)
+for (enq in enqueteurs) {
+  cat("Enquêteur :", enq, "\n")
+  
+  # Filtrer la commune en cours
+  df_enq <- df_temp %>% filter(enqueteur == enq)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_enq$dernier_chiffre)/length(df_enq$dernier_chiffre)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+## V. Distribution du chiffre des unités de la taille en cm
+
+### V.1. Au niveau de toute la region
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(gtExtras)
 library(gt)
-readRDS('df.rds') %>%
-    select(3:7) -> df
+library(dplyr)
+library(tidyr)
 
-df %>% 
-  labelled::remove_val_labels() %>%
-  group_by(Enqueteur) %>%
-  summarise(nombre = n()) %>%
-  add_row( Enqueteur = 'Moyenne', !!! colMeans(.[-1])) %>%
-  mutate(sup_moy = ifelse(Enqueteur == "Moyenne", TRUE, FALSE)) %>% 
-  mutate(Enqueteur = fct_reorder(Enqueteur, nombre)) %>% 
-  ggplot(aes(x=Enqueteur,y=nombre,fill=sup_moy)) +
-  geom_col(show.legend = FALSE) +
-  scale_fill_manual(name=NULL, values = c("#B0B0B0D0", "#00B0F0"))+
-  coord_flip() +
-  theme_minimal() +
-  theme(axis.title.x= element_blank(),
-        axis.title.y = element_blank(),
-        axis.text = element_text(size = 10),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank()
-       )
+temp = df2[,c("S2Q09")]
 
- 
+temp$S2Q09 = round(temp$S2Q09)
+temp <- temp %>% drop_na()
+temp <- temp %>%
+  mutate(last_digit = as.factor(S2Q09 %% 10)) %>%
+  group_by(last_digit) %>%
+  summarise(frequency = n()) %>%
+  mutate(percentage = (frequency / sum(frequency)) * 100)
+
+temp2 = temp[, c("last_digit", "percentage")]
+colnames(temp2) = c("Dernier chhiffre", "Pourcentage(en %)")
+
+temp2 %>%
+  gt() %>%
+  gt_theme_espn() %>% 
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
+```
+
+### V.2. Au niveau des départements
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+df_temp <- df2 %>%
+  mutate(taille = round(S2Q09))
+
+df_temp <- df_temp %>% drop_na(taille)
+df_temp <- df_temp %>%
+  mutate(dernier_chiffre_taille = as.factor(taille %% 10))
+
+
+departements <- unique(df_temp$division)
+for (dept in departements) {
+  cat("Département :", dept, "\n")
+  
+  # Filtrer le département en cours
+  df_dept <- df_temp %>% filter(division == dept)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_dept$dernier_chiffre_taille)/length(df_dept$dernier_chiffre_taille)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### V.3. Au niveau des communes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+communes <- unique(df_temp$commune)
+for (com in communes) {
+  cat("Commune :", com, "\n")
+  
+  # Filtrer le département en cours
+  df_com <- df_temp %>% filter(commune == com)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_com$dernier_chiffre_taille)/length(df_com$dernier_chiffre_taille)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### V.4. Au niveau des villages
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+villages <- unique(df_temp$village)
+for (vil in villages) {
+  cat("Village :", vil, "\n")
+  
+  # Filtrer le département en cours
+  df_vil <- df_temp %>% filter(village == vil)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_vil$dernier_chiffre_taille)/length(df_vil$dernier_chiffre_taille)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### V.5. Au niveau des enquêteurs
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+enqueteurs <- unique(df_temp$enqueteur)
+for (enq in enqueteurs) {
+  cat("Enquêteur :", enq, "\n")
+  
+  # Filtrer le département en cours
+  df_enq <- df_temp %>% filter(enqueteur == enq)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_enq$dernier_chiffre_taille)/length(df_enq$dernier_chiffre_taille)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
 ```
 
 
+## VI. Distribution du dernier chiffre du poids en kg
 
-# II. Les questionnaires avec les valeures manquantes
+### VI.1. Au niveau de toute la region
 
-Le tableau ci-dessous donne les valeurs manquantes des questionnaires.
 ```{r}
-#| label: tab1
+#| echo: false
 #| warning: false
 #| message: false
+
+library(gtExtras)
+library(gt)
+vec_poids = as.vector(df2$S2Q08)
+vec_poids = round(vec_poids)
+
+tbl_last_nb = as.factor(vec_poids %% 10)
+fr_tbl = 100*table(tbl_last_nb)/length(tbl_last_nb)
+fr_tbl = as.data.frame(fr_tbl)
+colnames(fr_tbl) = c("Dernier_chiffre_poids", "Pourcentage(%)")
+
+fr_tbl %>%
+  gt() %>%
+  gt_theme_pff() %>% 
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
+```
+
+### VI.2. Au niveau des départements
+
+```{r}
 #| echo: false
-#| results: "asis"
+#| warning: false
+#| message: false
 
-df |>
-  labelled::remove_val_labels() |>
-  filter(is.na(Region) | is.na(Record_your_current_location)) |>
-  gt::gt() |>
-  tab_spanner(
-    label = md("**Les questionnaires à complèter**"),
-    columns = c(2:5)
-  ) %>%
-   fmt_number(
-    columns = 5,
-    decimals = 3
-  ) %>%
-  cols_label(
-    #`Enqueteur` = "Nom enquêteur",
-    Sexe_de_l_enqueteur = "Sexe",
-    #`Region` = "Age",
-    #`Age` = "Lieu de residence",
-    Record_your_current_location = "Geolocalisation"
-  ) %>%
- cols_align(align = "center",
-             columns = 2:5)
 
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+df_temp <- df2 %>%
+  mutate(poids = round(S2Q08))
+
+df_temp <- df_temp %>% drop_na(poids)
+df_temp <- df_temp %>%
+  mutate(dernier_chiffre_poids = as.factor(poids %% 10))
+
+
+departements <- unique(df_temp$division)
+for (dept in departements) {
+  cat("Département :", dept, "\n")
+  
+  # Filtrer le département en cours
+  df_dept <- df_temp %>% filter(division == dept)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_dept$dernier_chiffre_poids)/length(df_dept$dernier_chiffre_poids)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### VI.3. Au niveau des communes
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+communes <- unique(df_temp$commune)
+for (com in communes) {
+  cat("Commune :", com, "\n")
+  
+  # Filtrer le département en cours
+  df_com <- df_temp %>% filter(commune == com)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_com$dernier_chiffre_poids)/length(df_com$dernier_chiffre_poids)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### VI.4. Au niveau des villages
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+villages <- unique(df_temp$village)
+for (vil in villages) {
+  cat("Village :", vil, "\n")
+  
+  # Filtrer le département en cours
+  df_vil <- df_temp %>% filter(village == vil)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_vil$dernier_chiffre_poids)/length(df_vil$dernier_chiffre_poids)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
+```
+
+### VI.5. Au niveau des enquêteurs
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+
+library(knitr)
+library(dplyr)
+library(tidyr)
+
+
+enqueteurs <- unique(df_temp$enqueteur)
+for (enq in enqueteurs) {
+  cat("Enquêteurs :", enq, "\n")
+  
+  # Filtrer le département en cours
+  df_enq <- df_temp %>% filter(enqueteur == enq)
+  
+  # Créer un tableau de fréquence pour le dernier chiffre de l'âge en mois
+  freq_table <- 100*table(df_enq$dernier_chiffre_poids)/length(df_enq$dernier_chiffre_poids)
+  
+  # Afficher le tableau sous forme de tableau Markdown
+  print(kable(as.data.frame(freq_table), col.names = c("Chiffre des unités", "Fréquence(en %)")))
+  
+  cat("\n")
+}
 ```
