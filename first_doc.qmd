@@ -21,7 +21,7 @@ format: pdf
 library(labelled)
 
 # Importation des données 
-df = readRDS("C:/Users/marc/Desktop/aurel/demo1/df.rds")
+df = readRDS("df.rds")
 
 #df1 = df$main
 #df2 = df$childrepeat
@@ -143,14 +143,26 @@ Le graphique ci dessous présente la progression de la charge de travail dans ch
 #| warning: false
 #| message: false
 
+df1 <- df1 %>%
+  to_character() %>%
+  as.data.frame()
+
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
 library(ggplot2)
 library(dplyr)
 
-df_count <- my_data %>%
-  group_by(departement) %>%
+df_count <- df1 %>%
+  group_by(S1Q05) %>%
   summarise(Percentage = 100 * n() / 90)
 
-ggplot(df_count, aes(x = departement, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q05, y = Percentage)) +
   geom_bar(stat = "identity", fill = "turquoise1") +
   labs(x = "Départements", y = "Pourcentage", title = "Progression du travail par département") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
@@ -162,7 +174,7 @@ ggplot(df_count, aes(x = departement, y = Percentage)) +
 
 ### II.2. Département de Boyo
 
-#### II.2.1.  Progression pour chaque commune du département de Boyo
+#### II.2.1. Progression pour chaque commune du département de Boyo
 
 Le graphique ci dessous présente la progression de la charge de travail dans chaque commune du département de Boyo
 
@@ -175,12 +187,12 @@ Le graphique ci dessous présente la progression de la charge de travail dans ch
 library(ggplot2)
 library(dplyr)
 
-temp = my_data[my_data$departement == "Boyo", ]
+temp = df1[df1$S1Q05 == "Boyo", ]
 df_count <- temp %>%
-  group_by(commune) %>%
+  group_by(S1Q06) %>%
   summarise(Percentage = 100 * n() / 30)
 
-ggplot(df_count, aes(x = commune, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q06, y = Percentage)) +
   geom_bar(stat = "identity", fill = "thistle") +
   labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par commune dans le département de Boyo") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
@@ -201,7 +213,7 @@ cat("*NB* : Si une commune ne s'affiche pas alors cela voudrait dire qu'aucun tr
 #| message: false
 
 
-temp = my_data[my_data$commune == "Belo", ]
+temp = df1[df1$S1Q06 == "Belo", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Belo")
 }
@@ -218,12 +230,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Belo") +
+  labs(x = "Enquêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Belo") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -247,7 +259,6 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 }
 ```
 
-
 #### II.2.3. Commune de Fundong
 
 ```{r}
@@ -256,7 +267,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 #| message: false
 
 
-temp = my_data[my_data$commune == "Fundong", ]
+temp = df1[df1$S1Q06 == "Fundong", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Fundong")
 }
@@ -274,12 +285,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Fundong") +
+  labs(x = "Enquêteur", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Fundong") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -312,7 +323,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 #| message: false
 
 
-temp = my_data[my_data$commune == "Njinikom", ]
+temp = df1[df1$S1Q06 == "Njinikom", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Njinikom")
 }
@@ -330,12 +341,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Njinikom") +
+  labs(x = "Enquêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Njinikom") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -362,7 +373,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 
 ### II.3. Département de Donga mantung
 
-#### II.3.1.  Progression pour chaque commune du département de Donga mantung
+#### II.3.1. Progression pour chaque commune du département de Donga mantung
 
 Le graphique ci dessous présente la progression de la charge de travail dans chaque commune du département de Donga mantung
 
@@ -375,12 +386,12 @@ Le graphique ci dessous présente la progression de la charge de travail dans ch
 library(ggplot2)
 library(dplyr)
 
-temp = my_data[my_data$departement == "Donga mantung", ]
+temp = df1[df1$departement == "Donga mantung", ]
 df_count <- temp %>%
-  group_by(commune) %>%
+  group_by(S1Q06) %>%
   summarise(Percentage = 100 * n() / 30)
 
-ggplot(df_count, aes(x = commune, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q06, y = Percentage)) +
   geom_bar(stat = "identity", fill = "thistle") +
   labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par commune dans le département de Donga mantung") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
@@ -401,7 +412,7 @@ cat("*NB* : Si une commune ne s'affiche pas alors cela voudrait dire qu'aucun tr
 #| message: false
 
 
-temp = my_data[my_data$commune == "Ako", ]
+temp = df1[df1$S1Q06 == "Ako", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune d'Ako")
 }
@@ -419,12 +430,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune d'Ako") +
+  labs(x = "Enquêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune d'Ako") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -448,7 +459,6 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 }
 ```
 
-
 #### II.3.3. Commune de Ndu
 
 ```{r}
@@ -457,7 +467,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 #| message: false
 
 
-temp = my_data[my_data$commune == "Ndu", ]
+temp = df1[df1$S1Q06 == "Ndu", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Ndu")
 }
@@ -475,12 +485,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Ndu") +
+  labs(x = "Eqnuêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Ndu") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -513,7 +523,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 #| message: false
 
 
-temp = my_data[my_data$commune == "Misaje", ]
+temp = df1[df1$S1Q06 == "Misaje", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Misaje")
 }
@@ -530,12 +540,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Misaje") +
+  labs(x = "Enquêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Misaje") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -562,7 +572,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 
 ### II.4. Département de Momo
 
-#### II.4.1.  Progression pour chaque commune du département de Momo
+#### II.4.1. Progression pour chaque commune du département de Momo
 
 Le graphique ci dessous présente la progression de la charge de travail dans chaque commune du département de Momo
 
@@ -575,12 +585,12 @@ Le graphique ci dessous présente la progression de la charge de travail dans ch
 library(ggplot2)
 library(dplyr)
 
-temp = my_data[my_data$departement == "Momo", ]
+temp = df1[df1$departement == "Momo", ]
 df_count <- temp %>%
-  group_by(commune) %>%
+  group_by(S1Q06) %>%
   summarise(Percentage = 100 * n() / 30)
 
-ggplot(df_count, aes(x = commune, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q06, y = Percentage)) +
   geom_bar(stat = "identity", fill = "thistle") +
   labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par commune dans le département de Momo") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
@@ -601,7 +611,7 @@ cat("*NB* : Si une commune ne s'affiche pas alors cela voudrait dire qu'aucun tr
 #| message: false
 
 
-temp = my_data[my_data$commune == "Babessi", ]
+temp = df1[df1$S1Q06 == "Babessi", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Babessi")
 }
@@ -619,12 +629,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Babessi") +
+  labs(x = "Enquêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Babessi") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -648,7 +658,6 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 }
 ```
 
-
 #### II.4.3. Commune de Balikumbat
 
 ```{r}
@@ -657,7 +666,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 #| message: false
 
 
-temp = my_data[my_data$commune == "Balikumbat", ]
+temp = df1[df1$S1Q06 == "Balikumbat", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Balikumbat")
 }
@@ -675,12 +684,12 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
-  labs(x = "Communes", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Balikumbat") +
+  labs(x = "Enquêteurs", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Balikumbat") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
  geom_text(aes(label = sprintf("%.1f%%", Percentage)), 
             position = position_dodge(width = 0.9), 
@@ -713,7 +722,7 @@ cat("*NB* : Si un enquêteur ne s'affiche pas alors cela voudrait dire qu'aucun 
 #| message: false
 
 
-temp = my_data[my_data$commune == "Ndop", ]
+temp = df1[df1$S1Q06 == "Ndop", ]
 if(nrow(temp) != 0){
 cat("Le graphique ci dessous présente la progression de la charge de travail de chaque", "\n", "enquêteur de la commune de Ndop")
 }
@@ -730,10 +739,10 @@ library(dplyr)
 
 if(nrow(temp) != 0){
 df_count <- temp %>%
-  group_by(enqueteur) %>%
+  group_by(S1Q03) %>%
   summarise(Percentage = 100 * n() / 10)
 
-ggplot(df_count, aes(x = enqueteur, y = Percentage)) +
+ggplot(df_count, aes(x = S1Q03, y = Percentage)) +
   geom_bar(stat = "identity", fill = "skyblue") +
   labs(x = "Enqueteur", y = "Pourcentage", title = "Progression du travail par enquêteur dans la commune de Ndop") +
   scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
@@ -796,7 +805,7 @@ ggplot(data = freq, aes(x = sexe, y = pourcentage)) +
 
 ### III.2. Par département
 
-* De façcon générale
+-   De façcon générale
 
 Le graphique ci-après présente la répartion des enfants par sexe par département
 
@@ -834,7 +843,6 @@ ggplot(data = freq, aes(x = division, y = pourcentage, fill = sexe)) +
     plot.background = element_rect(fill = "aliceblue")
   )
 ```
-
 
 #### III.2.1. Département de Boyo
 
@@ -879,7 +887,7 @@ ggplot(data = freq, aes(x = commune, y = pourcentage, fill = sexe)) +
 
 ##### III.2.1.2 Par commune
 
-* Commune de Belo
+-   Commune de Belo
 
 ```{r}
 #| echo: false
@@ -923,7 +931,7 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
 
-* Commune de Fundong
+-   Commune de Fundong
 
 ```{r}
 #| echo: false
@@ -967,7 +975,7 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
 
-* Commune de Njinikom
+-   Commune de Njinikom
 
 ```{r}
 #| echo: false
@@ -1010,7 +1018,6 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
-
 
 #### III.2.2. Département de Donga Mantung
 
@@ -1055,7 +1062,7 @@ ggplot(data = freq, aes(x = commune, y = pourcentage, fill = sexe)) +
 
 ##### III.2.2.2 Par commune
 
-* Commune d'Ako
+-   Commune d'Ako
 
 ```{r}
 #| echo: false
@@ -1099,7 +1106,7 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
 
-* Commune de Ndu
+-   Commune de Ndu
 
 ```{r}
 #| echo: false
@@ -1143,7 +1150,7 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
 
-* Commune de Misaje
+-   Commune de Misaje
 
 ```{r}
 #| echo: false
@@ -1230,7 +1237,7 @@ ggplot(data = freq, aes(x = commune, y = pourcentage, fill = sexe)) +
 
 ##### III.2.3.2 Par commune
 
-* Commune de Babessi
+-   Commune de Babessi
 
 ```{r}
 #| echo: false
@@ -1274,7 +1281,7 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
 
-* Commune de Balikumbat
+-   Commune de Balikumbat
 
 ```{r}
 #| echo: false
@@ -1323,7 +1330,7 @@ ggplot(data = freq, aes(x = enqueteur, y = pourcentage, fill = sexe)) +
 if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commune")}
 ```
 
-* Commune de Ndop
+-   Commune de Ndop
 
 ```{r}
 #| echo: false
@@ -1578,6 +1585,8 @@ pyramid(data = dataP,
 
 ## VI. Distribution du dernier chiffre de l'âge en mois
 
+Dans toute la suite, lorsque la fréquence d'un chiffre sera comprise entre 8 et 12, l'appréciation sera acceptable, dans le cas contraire, l'appréciation sera problématique.
+
 ### IV.1. Au niveau de toute la region
 
 ```{r}
@@ -1624,7 +1633,7 @@ temp2 %>%
 
 ### IV.2. Par département
 
-- Département de Boyo
+-   Département de Boyo
 
 ```{r}
 #| echo: false
@@ -1668,7 +1677,7 @@ temp2 %>%
 
 ```
 
-- Département de Donga mantung
+-   Département de Donga mantung
 
 ```{r}
 #| echo: false
@@ -1712,7 +1721,7 @@ temp2 %>%
 
 ```
 
-- Département de Momo
+-   Département de Momo
 
 ```{r}
 #| echo: false
@@ -1758,8 +1767,8 @@ temp2 %>%
 
 ### IV.3. Par Commune
 
-- Communes du département de Boyo
-  - Commune de Fundong
+-   Communes du département de Boyo
+    -   Commune de Fundong
 
 ```{r}
 #| echo: false
@@ -1803,7 +1812,9 @@ temp2 %>%
 
 ```
 
-    - Commune de Belo
+```         
+- Commune de Belo
+```
 
 ```{r}
 #| echo: false
@@ -1845,9 +1856,11 @@ temp2 %>%
   gt_theme_espn() %>% 
   tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
 
-```  
+```
 
-    - Commune de Njinikom
+```         
+- Commune de Njinikom
+```
 
 ```{r}
 #| echo: false
@@ -1891,9 +1904,8 @@ temp2 %>%
 
 ```
 
-
-- Communes du département de Donga mantung
-  - Commune de Ndu
+-   Communes du département de Donga mantung
+    -   Commune de Ndu
 
 ```{r}
 #| echo: false
@@ -1937,7 +1949,9 @@ temp2 %>%
 
 ```
 
-    - Commune de Misaje
+```         
+- Commune de Misaje
+```
 
 ```{r}
 #| echo: false
@@ -1979,9 +1993,11 @@ temp2 %>%
   gt_theme_espn() %>% 
   tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
 
-```  
+```
 
-    - Commune d'Ako
+```         
+- Commune d'Ako
+```
 
 ```{r}
 #| echo: false
@@ -2025,8 +2041,8 @@ temp2 %>%
 
 ```
 
-- Communes du département de Momo
-  - Commune de Balikumbat
+-   Communes du département de Momo
+    -   Commune de Balikumbat
 
 ```{r}
 #| echo: false
@@ -2070,7 +2086,9 @@ temp2 %>%
 
 ```
 
-    - Commune de Ndop
+```         
+- Commune de Ndop
+```
 
 ```{r}
 #| echo: false
@@ -2112,9 +2130,11 @@ temp2 %>%
   gt_theme_espn() %>% 
   tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
 
-```  
+```
 
-    - Commune de Babessi
+```         
+- Commune de Babessi
+```
 
 ```{r}
 #| echo: false
@@ -2167,14 +2187,24 @@ temp2 %>%
 #| warning: false
 #| message: false
 
-get_first_decimal <- function(num) {
-  if (num %% 1 == 0) {
-    return(0)
+dernier_chiffre <- function(nombre) {
+  
+  if (nombre == floor(nombre)) {
+    
+    return(nombre %% 10)
   } else {
-    rounded_num <- round(num, 1)
-    decimal_part <- rounded_num %% 1
-    first_decimal <- floor(decimal_part * 10)
-    return(first_decimal)
+    
+    nombre_str <- as.character(nombre)
+    
+    # Séparer la partie entière et la partie décimale
+    parties <- strsplit(nombre_str, "\\.")[[1]]
+    
+    # Prendre la partie décimale
+    partie_decimale <- parties[2]
+    
+    nbre = as.numeric(partie_decimale)
+    return(nbre %% 10)
+    
   }
 }
 ```
@@ -2192,7 +2222,7 @@ library(tidyr)
 temp = my_data
 temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2224,7 +2254,7 @@ temp2 %>%
 
 ### V.2. Par département
 
-- Département de Boyo
+-   Département de Boyo
 
 ```{r}
 #| echo: false
@@ -2239,9 +2269,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$departement == "Boyo", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2264,11 +2294,11 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-- Département de Donga mantung
+-   Département de Donga mantung
 
 ```{r}
 #| echo: false
@@ -2283,9 +2313,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$departement == "Donga mantung", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2308,11 +2338,11 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-- Département de Momo
+-   Département de Momo
 
 ```{r}
 #| echo: false
@@ -2327,9 +2357,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$departement == "Momo", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2352,14 +2382,14 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
 ### V.3. Par Commune
 
-- Communes du département de Boyo
-  - Commune de Fundong
+-   Communes du département de Boyo
+    -   Commune de Fundong
 
 ```{r}
 #| echo: false
@@ -2374,9 +2404,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Fundong", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2399,11 +2429,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-    - Commune de Belo
+```         
+- Commune de Belo
+```
 
 ```{r}
 #| echo: false
@@ -2418,9 +2450,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Belo", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2443,11 +2475,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
-```  
+```
 
-    - Commune de Njinikom
+```         
+- Commune de Njinikom
+```
 
 ```{r}
 #| echo: false
@@ -2462,9 +2496,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Njinikom", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2487,13 +2521,12 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-
-- Communes du département de Donga mantung
-  - Commune de Ndu
+-   Communes du département de Donga mantung
+    -   Commune de Ndu
 
 ```{r}
 #| echo: false
@@ -2508,9 +2541,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Ndu", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2533,11 +2566,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-    - Commune de Misaje
+```         
+- Commune de Misaje
+```
 
 ```{r}
 #| echo: false
@@ -2552,9 +2587,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Misaje", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2577,11 +2612,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
-```  
+```
 
-    - Commune d'Ako
+```         
+- Commune d'Ako
+```
 
 ```{r}
 #| echo: false
@@ -2596,9 +2633,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Ako", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2621,12 +2658,12 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-- Communes du département de Momo
-  - Commune de Balikumbat
+-   Communes du département de Momo
+    -   Commune de Balikumbat
 
 ```{r}
 #| echo: false
@@ -2641,9 +2678,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Balikumbat", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2666,11 +2703,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
-    - Commune de Ndop
+```         
+- Commune de Ndop
+```
 
 ```{r}
 #| echo: false
@@ -2685,9 +2724,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Ndop", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2710,11 +2749,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
-```  
+```
 
-    - Commune de Babessi
+```         
+- Commune de Babessi
+```
 
 ```{r}
 #| echo: false
@@ -2729,9 +2770,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Babessi", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(taille)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(taille, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(taille, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2754,7 +2795,7 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable taille")
 
 ```
 
@@ -2776,7 +2817,7 @@ library(tidyr)
 temp = my_data
 temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2800,7 +2841,7 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des derniers chiffres de la variable taille")
+  tab_header(title = "Tableau des fréquences des derniers chiffres de la variable poids")
 
 
 
@@ -2808,7 +2849,7 @@ temp2 %>%
 
 ### V.2. Par département
 
-- Département de Boyo
+-   Département de Boyo
 
 ```{r}
 #| echo: false
@@ -2823,9 +2864,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$departement == "Boyo", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2848,11 +2889,11 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-- Département de Donga mantung
+-   Département de Donga mantung
 
 ```{r}
 #| echo: false
@@ -2867,9 +2908,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$departement == "Donga mantung", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2892,11 +2933,11 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-- Département de Momo
+-   Département de Momo
 
 ```{r}
 #| echo: false
@@ -2911,9 +2952,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$departement == "Momo", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2936,14 +2977,14 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
 ### V.3. Par Commune
 
-- Communes du département de Boyo
-  - Commune de Fundong
+-   Communes du département de Boyo
+    -   Commune de Fundong
 
 ```{r}
 #| echo: false
@@ -2958,9 +2999,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Fundong", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -2983,11 +3024,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-    - Commune de Belo
+         
+- Commune de Belo
+
 
 ```{r}
 #| echo: false
@@ -3002,9 +3045,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Belo", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3027,11 +3070,12 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
-```  
+```
 
-    - Commune de Njinikom
+        
+- Commune de Njinikom
 
 ```{r}
 #| echo: false
@@ -3046,9 +3090,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Njinikom", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3071,13 +3115,12 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-
-- Communes du département de Donga mantung
-  - Commune de Ndu
+-   Communes du département de Donga mantung
+    -   Commune de Ndu
 
 ```{r}
 #| echo: false
@@ -3092,9 +3135,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Ndu", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3117,11 +3160,12 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-    - Commune de Misaje
+         
+- Commune de Misaje
 
 ```{r}
 #| echo: false
@@ -3136,9 +3180,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Misaje", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3161,11 +3205,13 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
-```  
+```
 
-    - Commune d'Ako
+         
+- Commune d'Ako
+
 
 ```{r}
 #| echo: false
@@ -3180,9 +3226,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Ako", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3205,12 +3251,12 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-- Communes du département de Momo
-  - Commune de Balikumbat
+-   Communes du département de Momo
+    -   Commune de Balikumbat
 
 ```{r}
 #| echo: false
@@ -3225,9 +3271,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Balikumbat", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3250,11 +3296,11 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
 
-    - Commune de Ndop
+- Commune de Ndop
 
 ```{r}
 #| echo: false
@@ -3269,9 +3315,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Ndop", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3294,11 +3340,11 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
-```  
+```
 
-    - Commune de Babessi
+- Commune de Babessi
 
 ```{r}
 #| echo: false
@@ -3313,9 +3359,9 @@ library(dplyr)
 library(tidyr)
 
 temp = my_data[my_data$commune == "Babessi", ]
-temp <- temp %>% drop_na(age_mois)
+temp <- temp %>% drop_na(poids)
 temp <- temp %>%
-  mutate(last_digit = factor(sapply(poids, get_first_decimal), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
+  mutate(last_digit = factor(sapply(poids, dernier_chiffre), level = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) %>%
   group_by(last_digit) %>%
   summarise(frequency = n()) %>%
   mutate(percentage = (frequency / sum(frequency)) * 100)
@@ -3338,6 +3384,6 @@ temp2 <- temp2 %>%
 temp2 %>%
   gt() %>%
   gt_theme_espn() %>% 
-  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable age")
+  tab_header(title = "Tableau des fréquences des chiffres des unités de la variable poids")
 
 ```
