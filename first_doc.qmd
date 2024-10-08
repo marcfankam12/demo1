@@ -1387,37 +1387,50 @@ if(nrow(temp) == 0) {cat("Aucun questionnaire n'a été rempli dans cette commun
 #| echo: false
 #| warning: false
 #| message: false
-#| fig.width: 8
+#| fig.width: 7
 #| fig.height: 5
 #| fig.align: "center"
 #| out.width: "80%"
 #| out.height: "80%"
 
-library(pyramid)
-textlab <- c()
-for(i in 0:5){
-  textlab[i+1] <- paste("]", as.character(i*10), ",", as.character((i+1)*10), "]", sep = "")
-}
-catAge <- cut(my_data$age_mois, breaks = seq(0, 60, 10), labels = textlab)
-my_data <- cbind(my_data, catAge)
-dataPyramide <- table(my_data$catAge, my_data$sexe)
 
-dataPyramide = as.data.frame(dataPyramide)
-cats <- dataPyramide[1:6,1]
-femmes <- dataPyramide[1:6, 3]
-hommes <- dataPyramide[7:12, 3]
+donnees1 =  data.frame(age = my_data$age_mois, sexe = my_data$sexe)
+donnees1 = donnees1[!is.na(donnees1$age), ]
+x = cut(donnees1$age, 
+        breaks = c(6, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59),
+        labels = c("6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45", "46-50", "51-55", "55-59"),
+        include.lowest = TRUE)
+donnees1$categorie = x
+donnees1 = to_character(donnees1)
+pyramide = data.frame(table(donnees1$categorie, donnees1$sexe))
+names(pyramide) = c("AgeGroup", "Gender", "Population")
 
-dataP <- data.frame(hommes, femmes, cats)
+pyramide$Gender = factor(pyramide$Gender, levels = c("Masculin", "Feminin"))
 
-pyramid(data = dataP,
-        main = "Pyramide des âges en mois des enfants enquêtés",
-        Laxis = seq(0, 5, 1),
-        Llab = "Garçons",
-        Rlab = "Fille",
-        Clab = "Ages en mois",
-        Cadj = 0.03
-        )
+pyramide <- pyramide %>%
+  mutate(PopPerc = case_when(Gender == "Masculin"~-round(Population/sum(Population)*100,2),
+                             TRUE~round(Population/sum(Population)*100,2)),
+         signal = case_when(Gender == "Masculin"~-1,
+                            TRUE~1))
+fonctionPY1 <- ggplot(pyramide) + 
+  geom_bar(aes(x = AgeGroup, y = PopPerc, fill = Gender), stat = 'identity')+
+  #geom_text(aes(x=AgeGroup, y=PopPerc+signal*.4, label = abs(PopPerc)))+
+  coord_flip()+
+  scale_fill_manual(name = '', values = c('blue', 'pink')) + 
+  scale_y_continuous(breaks = seq(-14, 14, 2),
+                     labels = function(x)paste0(abs(x),'%'))+
+  labs(x='', y='Pourcentage dans la population totale',
+       title = "Pyramide d'âge en mois des enfants enregistrés",
+       subtitle = paste("Total des enfants enregistrés dans le region :",
+                        sum(pyramide$Population ))
+  )+
+  cowplot::theme_cowplot()+
+  theme(axis.text.x = element_text(vjust = .5),
+        panel.grid.major.y = element_line(color = 'lightgray', linetype = 'dashed'),
+        legend.position = 'top',
+        legend.justification = 'center')
 
+fonctionPY1
 ```
 
 ### III.2. Par département
@@ -1426,36 +1439,140 @@ pyramid(data = dataP,
 #| echo: false
 #| warning: false
 #| message: false
+#| fig.width: 7
+#| fig.height: 5
+#| fig.align: "center"
+#| out.width: "80%"
+#| out.height: "80%"
+
+
+fonctionPY2 <- function(dep){
+  
+  
+  base_filtree = my_data[my_data$departement == dep, ]
+  donnees1 =  data.frame(age = base_filtree$age_mois, sexe = base_filtree$sexe)
+  donnees1 = donnees1[!is.na(donnees1$age), ]
+  x = cut(donnees1$age, 
+          breaks = c(6, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59),
+          labels = c("6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45", "46-50", "51-55", "55-59"),
+          include.lowest = TRUE)
+  donnees1$categorie = x
+  donnees1 = to_character(donnees1)
+  pyramide = data.frame(table(donnees1$categorie, donnees1$sexe))
+  names(pyramide) = c("AgeGroup", "Gender", "Population")
+  
+  pyramide$Gender = factor(pyramide$Gender, levels = c("Masculin", "Feminin"))
+  
+  pyramide <- pyramide %>%
+    mutate(PopPerc = case_when(Gender == "Masculin"~-round(Population/sum(Population)*100,2),
+                               TRUE~round(Population/sum(Population)*100,2)),
+           signal = case_when(Gender == "Masculin"~-1,
+                              TRUE~1))
+  graph <- ggplot(pyramide) + 
+    geom_bar(aes(x = AgeGroup, y = PopPerc, fill = Gender), stat = 'identity')+
+    #geom_text(aes(x=AgeGroup, y=PopPerc+signal*.4, label = abs(PopPerc)))+
+    coord_flip()+
+    scale_fill_manual(name = '', values = c('blue', 'pink')) + 
+    scale_y_continuous(breaks = seq(-26, 26, 2),
+                       labels = function(x)paste0(abs(x),'%'))+
+    labs(x='', y='Pourcentage dans la population totale',
+         title = "Pyramide d'âge en mois des enfants enregistrés",
+         subtitle = paste0("Total des enfants enregistrés dans le departement ", dep, " : ",
+                           sum(pyramide$Population ))
+    )+
+    cowplot::theme_cowplot()+
+    theme(axis.text.x = element_text(vjust = .5),
+          panel.grid.major.y = element_line(color = 'lightgray', linetype = 'dashed'),
+          legend.position = 'top',
+          legend.justification = 'center')
+  
+  return(graph)
+}
+```
+
+#### 1. Département de Boyo
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig.width: 7
+#| fig.height: 5
+#| fig.align: "center"
+#| out.width: "80%"
+#| out.height: "80%"
+
+
+fonctionPY2("Boyo")
+```
+
+#### 2. Département de Donga Mantung
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig.width: 7
+#| fig.height: 5
+#| fig.align: "center"
+#| out.width: "80%"
+#| out.height: "80%"
+
+
+fonctionPY2("Donga mantung")
+```
+
+#### 3. Département de Momo
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig.width: 7
+#| fig.height: 5
+#| fig.align: "center"
+#| out.width: "80%"
+#| out.height: "80%"
+
+
+fonctionPY2("Momo")
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
 #| fig.width: 8
 #| fig.height: 5
 #| fig.align: "center"
 #| out.width: "80%"
 #| out.height: "80%"
 
-library(pyramid)
+# library(pyramid)
 
-for(i in unique(my_data$departement)){
-temp = my_data[my_data$departement == i, ]
-catAge <- cut(temp$age_mois, breaks = seq(0, 60, 10), labels = textlab)
-temp <- cbind(temp, catAge)
-dataPyramide <- table(temp$catAge, temp$sexe)
-
-dataPyramide = as.data.frame(dataPyramide)
-cats <- dataPyramide[1:6,1]
-femmes <- dataPyramide[1:6, 3]
-hommes <- dataPyramide[7:12, 3]
-
-dataP <- data.frame(hommes, femmes, cats)
-
-pyramid(data = dataP,
-        main = paste("Pyramide des âges en mois des enfants enquêtés\n dans le département de ", i),
-        Laxis = seq(0, 3, 1),
-        Llab = "Garçons",
-        Rlab = "Fille",
-        Clab = "Ages en mois",
-        Cadj = 0.03
-        )
-}
+textlab = c("]0,10]", "]10,20]", "]20,30]", "]30,40]", "]40,50]","]50,60]")
+# for(i in unique(my_data$departement)){
+# temp = my_data[my_data$departement == i, ]
+# catAge <- cut(temp$age_mois, breaks = seq(0, 60, 10), labels = textlab)
+# temp <- cbind(temp, catAge)
+# dataPyramide <- table(temp$catAge, temp$sexe)
+# 
+# dataPyramide = as.data.frame(dataPyramide)
+# cats <- dataPyramide[1:6,1]
+# femmes <- dataPyramide[1:6, 3]
+# hommes <- dataPyramide[7:12, 3]
+# 
+# dataP <- data.frame(hommes, femmes, cats)
+# 
+# pyramid(data = dataP,
+#         main = paste("Pyramide des âges en mois des enfants enquêtés\n dans le département de ", i),
+#         Laxis = seq(0, 3, 1),
+#         Llab = "Garçons",
+#         Rlab = "Fille",
+#         Clab = "Ages en mois",
+#         Cadj = 0.03
+#         )
+# }
 ```
 
 ### III.3 Par commune
@@ -1464,40 +1581,95 @@ pyramid(data = dataP,
 #| echo: false
 #| warning: false
 #| message: false
+
+
+fonctionPY3 <- function(com){
+  
+  base_filtree = my_data[my_data$commune == com, ]
+  donnees1 =  data.frame(age = base_filtree$age_mois, sexe = base_filtree$sexe)
+  donnees1 = donnees1[!is.na(donnees1$age), ]
+  x = cut(donnees1$age, 
+          breaks = c(6, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59),
+          labels = c("6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", "41-45", "46-50", "51-55", "55-59"),
+          include.lowest = TRUE)
+  donnees1$categorie = x
+  donnees1 = to_character(donnees1)
+  
+  pyramide = data.frame(table(donnees1$categorie, donnees1$sexe))
+  names(pyramide) = c("AgeGroup", "Gender", "Population")
+  
+  pyramide$Gender = factor(pyramide$Gender, levels = c("Masculin", "Feminin"))
+  
+  pyramide <- pyramide %>%
+    mutate(PopPerc = case_when(Gender == "Masculin"~-round(Population/sum(Population)*100,2),
+                               TRUE~round(Population/sum(Population)*100,2)),
+           signal = case_when(Gender == "Masculin"~-1,
+                              TRUE~1))
+  graph <- ggplot(pyramide) + 
+    geom_bar(aes(x = AgeGroup, y = PopPerc, fill = Gender), stat = 'identity')+
+    #geom_text(aes(x=AgeGroup, y=PopPerc+signal*.4, label = abs(PopPerc)))+
+    coord_flip()+
+    scale_fill_manual(name = '', values = c('blue', 'pink')) + 
+    scale_y_continuous(breaks = seq(-36, 36, 4),
+                       labels = function(x)paste0(abs(x),'%'))+
+    labs(x='', y='Pourcentage dans la population totale',
+         title = "Pyramide d'âge en mois des enfants enregistrés",
+         subtitle = paste0("Total des enfants enregistrés dans la commune ", com, " : ",
+                           sum(pyramide$Population ))
+    )+
+    cowplot::theme_cowplot()+
+    theme(axis.text.x = element_text(vjust = .5),
+          panel.grid.major.y = element_line(color = 'lightgray', linetype = 'dashed'),
+          legend.position = 'top',
+          legend.justification = 'center')
+  
+  return(graph)
+}
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
 #| fig.width: 8
 #| fig.height: 5
 #| fig.align: "center"
 #| out.width: "80%"
 #| out.height: "80%"
 
-library(pyramid)
+#library(pyramid)
 
 cat("1. Communes du département de Boyo", "\n")
 
-temp = my_data[my_data$departement == "Boyo", ]
+fonctionPY3("Belo")
+fonctionPY3("Fundong")
+fonctionPY3("Njinikom")
 
-for(i in unique(temp$commune)){
-temp1 = temp[temp$commune == i, ]
-catAge <- cut(temp1$age_mois, breaks = seq(0, 60, 10), labels = textlab)
-temp1 <- cbind(temp1, catAge)
-dataPyramide <- table(temp1$catAge, temp1$sexe)
-
-dataPyramide = as.data.frame(dataPyramide)
-cats <- dataPyramide[1:6,1]
-femmes <- dataPyramide[1:6, 3]
-hommes <- dataPyramide[7:12, 3]
-
-dataP <- data.frame(hommes, femmes, cats)
-
-pyramid(data = dataP,
-        main = paste("Pyramide des âges en mois des enfants enquêtés\n dans la commune de ", i),
-        Laxis = seq(0, 3, 1),
-        Llab = "Garçons",
-        Rlab = "Fille",
-        Clab = "Ages en mois",
-        Cadj = 0.03
-        )
-}
+# temp = my_data[my_data$departement == "Boyo", ]
+# 
+# for(i in unique(temp$commune)){
+# temp1 = temp[temp$commune == i, ]
+# catAge <- cut(temp1$age_mois, breaks = seq(0, 60, 10), labels = textlab)
+# temp1 <- cbind(temp1, catAge)
+# dataPyramide <- table(temp1$catAge, temp1$sexe)
+# 
+# dataPyramide = as.data.frame(dataPyramide)
+# cats <- dataPyramide[1:6,1]
+# femmes <- dataPyramide[1:6, 3]
+# hommes <- dataPyramide[7:12, 3]
+# 
+# dataP <- data.frame(hommes, femmes, cats)
+# 
+# pyramid(data = dataP,
+#         main = paste("Pyramide des âges en mois des enfants enquêtés\n dans la commune de ", i),
+#         Laxis = seq(0, 3, 1),
+#         Llab = "Garçons",
+#         Rlab = "Fille",
+#         Clab = "Ages en mois",
+#         Cadj = 0.03
+#         )
+# }
 
 ```
 
@@ -1511,34 +1683,38 @@ pyramid(data = dataP,
 #| out.width: "80%"
 #| out.height: "80%"
 
-library(pyramid)
+# library(pyramid)
 
 cat("2. Communes du département de Donga mantung", "\n")
 
-temp = my_data[my_data$departement == "Donga mantung", ]
+fonctionPY3("Ndu")
+fonctionPY3("Misaje")
+fonctionPY3("Ako")
 
-for(i in unique(temp$commune)){
-temp1 = temp[temp$commune == i, ]
-catAge <- cut(temp1$age_mois, breaks = seq(0, 60, 10), labels = textlab)
-temp1 <- cbind(temp1, catAge)
-dataPyramide <- table(temp1$catAge, temp1$sexe)
-
-dataPyramide = as.data.frame(dataPyramide)
-cats <- dataPyramide[1:6,1]
-femmes <- dataPyramide[1:6, 3]
-hommes <- dataPyramide[7:12, 3]
-
-dataP <- data.frame(hommes, femmes, cats)
-
-pyramid(data = dataP,
-        main = paste("Pyramide des âges en mois des enfants enquêtés\n dans la commune de ", i),
-        Laxis = seq(0, 3, 1),
-        Llab = "Garçons",
-        Rlab = "Fille",
-        Clab = "Ages en mois",
-        Cadj = 0.03
-        )
-}
+# temp = my_data[my_data$departement == "Donga mantung", ]
+# 
+# for(i in unique(temp$commune)){
+# temp1 = temp[temp$commune == i, ]
+# catAge <- cut(temp1$age_mois, breaks = seq(0, 60, 10), labels = textlab)
+# temp1 <- cbind(temp1, catAge)
+# dataPyramide <- table(temp1$catAge, temp1$sexe)
+# 
+# dataPyramide = as.data.frame(dataPyramide)
+# cats <- dataPyramide[1:6,1]
+# femmes <- dataPyramide[1:6, 3]
+# hommes <- dataPyramide[7:12, 3]
+# 
+# dataP <- data.frame(hommes, femmes, cats)
+# 
+# pyramid(data = dataP,
+#         main = paste("Pyramide des âges en mois des enfants enquêtés\n dans la commune de ", i),
+#         Laxis = seq(0, 3, 1),
+#         Llab = "Garçons",
+#         Rlab = "Fille",
+#         Clab = "Ages en mois",
+#         Cadj = 0.03
+#         )
+# }
 
 ```
 
@@ -1552,34 +1728,39 @@ pyramid(data = dataP,
 #| out.width: "80%"
 #| out.height: "80%"
 
-library(pyramid)
+# library(pyramid)
 
 cat("3. Communes du département de Momo", "\n")
 
-temp = my_data[my_data$departement == "Momo", ]
+fonctionPY3("Ndop")
+fonctionPY3("Balikumbat")
+fonctionPY3("Babessi")
 
-for(i in unique(temp$commune)){
-temp1 = temp[temp$commune == i, ]
-catAge <- cut(temp1$age_mois, breaks = seq(0, 60, 10), labels = textlab)
-temp1 <- cbind(temp1, catAge)
-dataPyramide <- table(temp1$catAge, temp1$sexe)
 
-dataPyramide = as.data.frame(dataPyramide)
-cats <- dataPyramide[1:6,1]
-femmes <- dataPyramide[1:6, 3]
-hommes <- dataPyramide[7:12, 3]
+# temp = my_data[my_data$departement == "Momo", ]
 
-dataP <- data.frame(hommes, femmes, cats)
-
-pyramid(data = dataP,
-        main = paste("Pyramide des âges en mois des enfants enquêtés\n dans la commune de ", i),
-        Laxis = seq(0, 3, 1),
-        Llab = "Garçons",
-        Rlab = "Fille",
-        Clab = "Ages en mois",
-        Cadj = 0.03
-        )
-}
+# for(i in unique(temp$commune)){
+# temp1 = temp[temp$commune == i, ]
+# catAge <- cut(temp1$age_mois, breaks = seq(0, 60, 10), labels = textlab)
+# temp1 <- cbind(temp1, catAge)
+# dataPyramide <- table(temp1$catAge, temp1$sexe)
+# 
+# dataPyramide = as.data.frame(dataPyramide)
+# cats <- dataPyramide[1:6,1]
+# femmes <- dataPyramide[1:6, 3]
+# hommes <- dataPyramide[7:12, 3]
+# 
+# dataP <- data.frame(hommes, femmes, cats)
+# 
+# pyramid(data = dataP,
+#         main = paste("Pyramide des âges en mois des enfants enquêtés\n dans la commune de ", i),
+#         Laxis = seq(0, 3, 1),
+#         Llab = "Garçons",
+#         Rlab = "Fille",
+#         Clab = "Ages en mois",
+#         Cadj = 0.03
+#         )
+# }
 
 ```
 
