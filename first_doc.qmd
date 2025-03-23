@@ -1,6 +1,6 @@
 ---
 title: "Etat Recaptulatif de la Collecte de ce jour: `r Sys.Date()`"
-author: "Fankam Marc"
+author: "INS"
 format: pdf
 ---
 
