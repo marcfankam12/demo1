@@ -46,7 +46,7 @@ jobs:
         path: first_doc.qmd
     
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v3
       with:
         name: first_doc.pdf
         path: first_doc.pdf
