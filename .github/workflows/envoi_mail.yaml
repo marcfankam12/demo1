@@ -1,9 +1,9 @@
 name: envoi_mon_mail
 
 on:
-  workflow_dispatch:
-  schedule:
-  - cron: '5 * * * *'
+  # workflow_dispatch:
+  # schedule:
+  # - cron: '5 * * * *'
     
 jobs:
   envoi_mail:
